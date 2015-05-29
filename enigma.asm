@@ -4,8 +4,10 @@
 ;*				Arquitectura de Computadores						*
 ;*				Erick Hernández Bonilla								*
 ;*				Proyecto: Máquina Enigma en Ensamblador				*
-;*				Alumnas: Melissa Molina Corrales 2013006074			*
+;*				Alumnos: Melissa Molina Corrales 2013006074			*
 ;*						 Liza Chaves Carranza 2013016573			*
+;*						 Gabriel Pizarro 201216833					*
+;*						 Fabián Monge								*
 ;********************************************************************
 
 ; Datos sin inicializar
