@@ -1,36 +1,44 @@
-;********************************************************************
-;*				Tecnológico de Costa Rica							*
-;*				Ingeniería en Computación							*
-;*				Arquitectura de Computadores						*
-;*				Erick Hernández Bonilla								*
-;*				Proyecto: Máquina Enigma en Ensamblador				*
-;*				Alumnos: Melissa Molina Corrales 2013006074			*
-;*						 Liza Chaves Carranza 2013016573			*
-;*						 Gabriel Pizarro 201216833					*
-;*						 Fabián Monge								*
-;********************************************************************
+;****************************************
+;	Tecnológico de Costa Rica	*
+;*	Ingeniería en Computación	*
+;*	Arquitectura de Computadoras	*
+;*	Profe:				*
+;*	Erick Hernández Bonilla		*
+;*	Proyecto: 			*
+;*	Máquina Enigma en Ensamblador	*
+;*	Alumnos: 			*
+;*	Melissa Molina 2013006074	*
+;*	Liza Chaves Carranza 2013016573	*
+;*	Fabián Monge 			*
+;*	Gabreiel Pizarro 201216833	*
+;****************************************
 
-; Datos sin inicializar
 section .bss
 
-	buffer: resb bufferLen 
-	bufferLen: equ 1024
+	rotores:	resb 	
 
-; Datos inicializados
+	plugboard:	resb 29
+	lenPlugboard: 	equ $ - plugboard
+	; ejemplo de blugboard:
+		; XF,PZ,SQ,GR,AJ,UO,CN,BV,TM,Ki
+
 section .data
 
-	primerRotor: db 'EKMFLGDQVZNTOWYHXUSPAIBRCJ'
-	segundoRotor: db 'AJDKSIRUXBLHWTMCQGZNPYFVOE'
-	tercerRotor: db 'BDFHJLCPRTXVZNYEIWGAKMUSQO'
-	cuartoRotor: db 'BDFHJLCPRTXVZNYEIWGAKMUSQO'
-	quintoRotor: db 'ESOVPZJAYQUIRHXLNFTGKDCMWB'
-	reflector: db ''
+	rotorUno:	db 'EKMFLGDQVZNTOWYHXUSPAIBRCJ'
+	rotorDos: 	db 'AJDKSIRUXBLHWTMCQGZNPYFVOE'
+	rotorTres: 	db 'BDFHJLCPRTXVZNYEIWGAKMUSQO'
+	rotorCuatro: 	db 'ESOVPZJAYQUIRHXLNFTGKDCMWB' 
+	rotorCinco: 	db 'VZBRGITYUPSDNHLXAWMJQOFECK'
+	reflector: 	db 'JPGVOUMFYQBENHZRDKASXLICTW'
+	;  estatico:	db 'ABCDEFHGIJKLMNOPQRSTUVWXYZ'
 
-	
-
-; Código
 section .text
 	global _start
 
 _start:
+	
+numeros: 	db 'I,II,III,IV,V'
+
+getPos:
+
 
