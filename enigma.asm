@@ -1,4 +1,4 @@
-
+;****************************************
 ;*	Tecnológico de Costa Rica	*
 ;*	Ingeniería en Computación	*
 ;*	Arquitectura de Computadoras	*
@@ -15,7 +15,7 @@
 
 section .bss
 
-	rotores:        resb
+	rotores:        resb 1024
 
  	plugboard:      resb 29
 	lenPlugboard:   equ $ - plugboard
@@ -32,12 +32,22 @@ section .data
 	reflector:      db 'JPGVOUMFYQBENHZRDKASXLICTW'
 	;  estatico:    db 'ABCDEFHGIJKLMNOPQRSTUVWXYZ'
 
+
+	rotores:	resb 	
+
+	plugboard:	resb 29
+	lenPlugboard: 	equ $ - plugboard
+	; ejemplo de blugboard:
+		; XF,PZ,SQ,GR,AJ,UO,CN,BV,TM,Ki
+
 section .text
 	global _start
 
 _start:
-
-	numeros:        db 'I,II,III,IV,V'
-
 	
+numeros: 	db 'I,II,III,IV,V'
+
 getPos:
+
+
+
