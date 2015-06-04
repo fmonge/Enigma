@@ -1,3 +1,15 @@
+;********************************************************************
+;*				Tecnológico de Costa Rica							*
+;*				Ingeniería en Computación							*
+;*				Arquitectura de Computadores						*
+;*				Erick Hernández Bonilla								*
+;*				Proyecto: Máquina Enigma en Ensamblador				*
+;*				Alumnos: Melissa Molina Corrales 2013006074			*
+;*						 Liza Chaves Carranza 2013016573			*
+;*						 Gabriel Pizarro Picado 201216833			*
+;*						 Fabián Monge García 2014088148				*
+;********************************************************************
+
 section .bss
 despTemp resb 3                      ; para guardar el cada desplazamiento y convertirlo en int
 buffNumRomano resb 4				 ; buffer donde se guardan el número romano
