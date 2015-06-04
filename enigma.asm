@@ -15,6 +15,19 @@
 %include "in_out.mac"
 
 
+
+%macro rotoresM 1
+	%%loop:
+	rotor %1, rbx	; %macro rotor 1  ; rotorActual
+	inc rbx
+	cmp rbx, rcx
+	jne %%loop
+	xor rbx, rbx
+	;ret
+%endmacro
+
+
+
 %macro rotor 2	;rotorNext, pos
 	push rax
 	xor rax, rax
@@ -30,58 +43,53 @@
 %endmacro
 
 %macro plugboardM 2		; lenBuf, plugboard
-	push rx		;	
-	push rcx
-	push rbx
-	push rdx
-
-	xor rbx, rbx
+	push rax		;XF,PZ,SQ,GR,AJ,UO,CN,BV,TM,KI	
+	push rcx	; cont Buf
+	push rbx	; cont de pb
+	push rdx	
+	
+	xor rcx, rcx
 %%loopBuf:
-	xor rdx, rdx
-	cmp rcx, %1
-	je %%endPB
-
-	mov dl, [textoCifrado + rcx]
-
-	
-	xor rdi, rdi
-%%findInPlugboard:
-	cmp rdi, 20
-	je %%continueLoop
-
-	cmp dl, [plugboard+rdi]
-	inc rdi
-	jne %%findInPlugboard	 
-	
-	push rax
+	xor rbx, rbx
 	xor rax, rax
-	mov rbx, 2
-	mov rax, rdi
-	div rbx
-	cmp rdx, 0
-	je %%masUno
-	jne %%menosUno
 	;div rbx, divide el rax entre el rbx, 
 	;deja el resultado en el rax y el residuo en el rdx	
-
+	mov al, [textoCifrado+ rcx]
 	
+%%loopPb:
+	mov ah, [%2+ rbx]
+	cmp al, ah
+	je %%swap
 	
+	inc rbx
+	cmp rbx, 29
+	jne %%loopPb
+	je %%continueLoop
 
-	%%masUno:		;no dec rdi	
-	mov dl, byte[%2 + rdi]
-	mov byte[textoCifrado + rcx], dl
+%%swap:
+	cmp rbx, 0
+	je %%masUno
+	cmp rbx, 1
+	je %%menosUno
+	cmp rbx, 28
+	je %%menosUno
+	cmp byte [%2+ rbx - 1], ','
+	je %%masUno
+	jne %%menosUno
+	
+%%masUno:		;no dec rdi	
+	mov ah, [%2 + rbx + 1 ]
+	mov [textoCifrado + rcx], ah
 	jmp %%continueLoop
 
-	%%menosUno:
-	;dec rdi	
-	;dec rdi
-	mov dl, byte[%2 + rdi]
-	mov byte[textoCifrado + rcx], dl
-	
+%%menosUno:
+	mov ah, [%2 + rbx - 1]
+	mov byte[textoCifrado + rcx], ah
 
 %%continueLoop:
 	inc rcx
-	jmp %%loopBuf
+	cmp rcx, %1
+	jne %%loopBuf
 %%endPB
 	pop rdx
 	pop rbx
@@ -109,8 +117,8 @@ section .data
 	lenRotores:	equ $ - rotorUno
 	rotorDos:       db 'AJDKSIRUXBLHWTMCQGZNPYFVOE'
 	rotorTres:      db 'BDFHJLCPRTXVZNYEIWGAKMUSQO'
-	;plugboard:	db 'XF,PZ,SQ,GR,AJ,UO,CN,BV,TM,KI'
-	plugboard:	db 'XFPZSQGRAJUOCNBVTMKI'
+plugboard:	db 'XF,PZ,SQ,GR,AJ,UO,CN,BV,TM,KI'
+;	plugboard:	db 'XFPZSQGRAJUOCNBVTMKI'
 	
 	
 	rotorI:       	db 'EKMFLGDQVZNTOWYHXUSPAIBRCJ'
@@ -141,32 +149,34 @@ _start:
 	leer textIn, lenTextIn	;len de lectura --> rax
 	mov rcx, rax
 	dec rcx			;quitar 0x0A	
-	;plugboardM
+
  	call copiarBuf		; mov textoCifrado, textIn	
 
-plugboardM lenTextIn, plugboard
+;	plugboardM lenTextIn, plugboard
 
 	xor r8, r8 		
 	lea rsi, [textIn]
 	lea rdi, [textoCifrado]	 	
-;	call rotores	;rbx ==> puntero-cont recorre el bufer
-	
+	;;call rotores	;rbx ==> puntero-cont recorre el bufer
+
+	rotoresM rotorUno
+
         print newline, 1
 	print textoCifrado, lenTextIn
 	
 	print newline, 2
 
-	
+
 
 	;print textIn, lenTextIn
 	exit
 	
 
-rotores:
+rotoresA:
 	rotor rotorUno, rbx	; %macro rotor 1  ; rotorActual
 	inc rbx
 	cmp rbx, rcx
-	jne rotores
+	jne rotoresA
 	xor rbx, rbx
 	ret
 ;end rot1
@@ -179,21 +189,6 @@ copiarBuf:
 	pop rcx
 	ret
 ;end copiar
-
-
-
-
-;cifrar:
-
-
-;endCifrar
-
-
-
-
-
-
-
 
 
 exit
