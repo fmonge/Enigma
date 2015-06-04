@@ -59,12 +59,32 @@ ERRLEN equ $-ErrMsg
 saltoLinea: db "", 10, 0			; saltoLinea
 saltoLineaLargo: equ $-saltoLinea
 
+encabezado: db "              ********** Máquina Enigma Versión Militar M3 **********", 0x0A
+encabezadoLen: equ $-encabezado
+
+texto: db "La letra señalada con la flecha, es la letra encriptada: ", 0x0A
+textoLen: equ $-texto
+
+respuesta: db "Texto Inicial: ", 0x0A
+respuestaLen: equ $-respuesta
+
+encriptado: db "Texto Encriptado: ", 0x0A
+encritadoLen: equ $-encriptado
+
+flecha: db " <----", 0x0A
+flechaLen: equ $-flecha
+
 
 msjHOLA 	db 10,"aqui estoy.",10
 section .text
   global _start
 
 _start:
+
+	print saltoLinea, saltoLineaLargo
+	print encabezado, encabezadoLen
+	print saltoLinea, saltoLineaLargo
+	print texto, textoLen
 
 	; Toma el argumento de la línea de comando de la pila y lo valida
 	
@@ -118,24 +138,36 @@ _start:
 	call printText
 	plugboardM 1024, plugboard	
 	call printText
-	print textoCifrado,1
-	;print newline, 1
-	;cmp r15, r8
-	;jne .loop
+	print flecha, flechaLen
+	print newline, 1
+
 	inc r15
 	jmp .loop
+
 	.exit:
+
+		print saltoLinea, saltoLineaLargo
+		print respuesta, respuestaLen
+		print textoFinal2, lenTextoFinal2
+		print saltoLinea, saltoLineaLargo
+		print encriptado, encritadoLen
+		print textoCifrado, lenTextoCifrado
+		print saltoLinea, saltoLineaLargo
+
 	  exit
 	
   printText:
-	;print newline, 1
-	  ;print textoCifrado, textoFinal2	
+	print newline, 1
+	  print textoCifrado, textoFinal2	
 	  lea rsi, [textoFinal2]
 	  lea rdi, [textoCifrado]			
 	  ret
+
   ;;prueba para saber que todo está bien
   ;call ImprimirRotores
   ;;
   
+  print saltoLinea, saltoLineaLargo
+
   call Exit
  
