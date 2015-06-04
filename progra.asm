@@ -1,13 +1,15 @@
 section .bss
-buffNumRomano resb 3						; buffer donde se guardan el número romano
-buffRotorLen equ 26						; solo un len porque todos los rotores tiene el mismo tamaño
+despTemp resb 3                              ; para guardar el cada desplazamiento y convertirlo en int
+buffNumRomano resb 4						        ; buffer donde se guardan el número romano
+buffRotorLen equ 27						           ; solo un len porque todos los rotores tiene el mismo tamaño
 buffRotorUno resb buffRotorLen					; buffer donde se carga el primer rotor seleccionado
 buffRotorDos resb buffRotorLen					; buffer donde se carga el segundo rotor seleccionado
 buffRotorTres resb buffRotorLen					; buffer donde se carga el tercer rotor seleccionado
 
 ;;;;;;;;Para el test;;;;;;;;;;;;;;;;;;;;;;;;;;;
-buffRotoresSeleccionados resb 7
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+buffRotoresSeleccionados resb 8
+buffDesplazamientoRotores resb 9
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 section .data
 rotor1: db "EKMFLGDQVZNTOWYHXUSPAIBRCJ"				; R
@@ -21,8 +23,9 @@ section .text
   global _start
   
 _start:
+    mov rbp, rsp; for correct debugging
   
-  ;;;;;;;;Para simular el buffer que tiene los rotores seleccionados (parte de liza y Meli);;;;;;;;;;;
+  ;;;;;;;;Para simular el buffer que tiene los rotores seleccionados y los corrimientos (parte de liza y Meli);;;;;;;;;;;
   mov byte[buffRotoresSeleccionados + 0], 'I'
   mov byte[buffRotoresSeleccionados + 1], ','
   mov byte[buffRotoresSeleccionados + 2], 'I'
@@ -30,10 +33,19 @@ _start:
   mov byte[buffRotoresSeleccionados + 4], 'I'
   mov byte[buffRotoresSeleccionados + 5], ','
   mov byte[buffRotoresSeleccionados + 6], 'V'
+
+  mov byte[buffDesplazamientoRotores + 0], '1'
+  mov byte[buffDesplazamientoRotores + 1], '3'
+  mov byte[buffDesplazamientoRotores + 2], ','
+  mov byte[buffDesplazamientoRotores + 3], '1'
+  mov byte[buffDesplazamientoRotores + 4], ','
+  mov byte[buffDesplazamientoRotores + 5], '2'
+  mov byte[buffDesplazamientoRotores + 6], '2'
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   
   call CargarRotoresSeleccionados
-  
+  call RotarRotores
+ 
   exit:
     mov rax, 60
     mov rdi, 0
@@ -54,17 +66,23 @@ CargarRotoresSeleccionados:
     push rax
     push rsi
     push rdi
+    push r8
+    push r9
     xor rsi, rsi
     mov rcx, 1							; contador para saber en cual buffer cargar el rotor seleccionado
+    
     .begin:
         cmp byte[buffRotoresSeleccionados + rsi], 00h		; si se llega al final del buffer que contiene los rotores
-        je .exit						; sale del procedimiento
-	  
-	call CargarNumeroDeRotor				; va a cargar el número que el rsi esté apuntando
+        je .exit						                    ; sale del procedimiento
+	       
+        mov r8, buffRotoresSeleccionados        ;parametros para CargarNumeroABuffer
+        mov r9, buffNumRomano
+	      call CargarNumeroABuffer				; va a cargar el número que el rsi esté apuntando
         
         mov rax, buffNumRomano					; parametro del procedimiento CambiarRomanoADecimal
         call CambiarRomanoADecimal				
-        call LimpiarBuffNumRomano				
+        mov rax, buffNumRomano
+        call LimpiarBuff				
         push rsi						; se guarda el rsi (contador de los números de rotores seleccionados)						
         call AsignarRotorSeleccionado				
         call AsignarBufferDeRotorSeleccionado
@@ -75,6 +93,8 @@ CargarRotoresSeleccionados:
         jmp .begin
         
     .exit:
+        pop r9
+        pop r8
 	pop rdi
         pop rsi
         pop rax
@@ -127,6 +147,7 @@ AsignarRotorSeleccionado:
     .exit:
         ret
 
+
 ;------AsignarBufferDeRotorSeleccionado-----;
 ;                                           ;
 ; Asigna al rdi el buffer para guardar      ;
@@ -160,43 +181,47 @@ AsignarBufferDeRotorSeleccionado:
     .exit:
         ret
 
-;----------CargarNumeroDeRotor----------;
-;                                       ;
-; Cargar el primer número romano que    ;
-; encuentre en el buffer de rotores     ;
-; seleccionados a el buffer del         ;
-; número romano                         ;
-;                                       ;    
-; Parametros: rsi = cont de num romanos ;                               
-; Salida: buffer de num romano, cargado ;                                   
-;_______________________________________;
-CargarNumeroDeRotor:
+
+;------------CargarNumeroABuffer-------------;
+;                                            ;
+; Cargar el primer número romano que         ;
+; encuentre en el buffer de rotores          ;
+; seleccionados a el buffer del              ;
+; número romano                              ;
+;                                            ;    
+; Parametros: rsi = cont de num romanos      ;
+;             r8 = buffer con numeros        ;
+;             r9 = buffer a depositar numero ;                                
+; Salida: buffer del número, cargado         ;                                   
+;____________________________________________;
+CargarNumeroABuffer:
     push rax
     push rcx
     xor rcx, rcx
     
     .begin:
-        cmp byte[buffRotoresSeleccionados + rsi], 00h		; si se llegó al final de buffer de rotores seleccionados
-        je .exit						; entonces sale del procedimiento
+        cmp byte[r8 + rsi], 00h             ; si se llegó al final del buffer de numeros
+        je .exit                            ; entonces sale del procedimiento
            
-        cmp byte[buffRotoresSeleccionados + rsi], ','		; si encuentre una ',', entonces terminó de leer un número romano
-        je .nextNum						; y salta para mover el rsi y elminar esa ','
+        cmp byte[r8 + rsi], ','             ; si encuentre una ',', entonces terminó de leer un número
+        je .nextNum                         ; y salta para mover el rsi y elminar esa ','
         
-        mov al, byte[buffRotoresSeleccionados + rsi]		; mueve al 'al' el dígito del número del rotor
-        mov byte[buffNumRomano + rcx], al			; guarda un dígito del número de rotor que esté leyendo al buffer de número romano
+        mov al, byte[r8 + rsi]              ; mueve al 'al' el dígito del número del rotor
+        mov byte[r9 + rcx], al              ; guarda un dígito del número actual que esté leyendo al buffer para guardarlo
         
-        inc rcx							; contador del buffer del número romano actual
-        inc rsi							; incrementa contador del buffer de rotores seleccionados
-        jmp .begin						; si no ha terminado de leer, comienza de nuevo
+        inc rcx                             ; contador del buffer del número actual
+        inc rsi                             ; incrementa contador del buffer de números
+        jmp .begin                          ; si no ha terminado de leer, comienza de nuevo
     
     .nextNum:
-        inc rsi                    				; esto es por si se encontró una ',', y dejar el 
-								; contador apuntando en el siguiente número 
+        inc rsi                             ; esto es por si se encontró una ',', y dejar el 
+                                            ; contador apuntando en el siguiente número 
     .exit:
         pop rcx
         pop rax
         ret
-        
+
+
 ;---------cargarRotorABuffer---------;
 ;                                    ;
 ; Cargar un rotor a un buffer        ;
@@ -264,20 +289,30 @@ CambiarRomanoADecimal:
     .exit:
         ret
 
-;--LimpiarBuffNumRomano--;
-;                        ;
-; Limpia el buffer que   ;
-; tiene le número romano ;
-;                        ;
-; Parametros: ---        ;
-; Salida: ---            ;
-;________________________;
-LimpiarBuffNumRomano:
-    mov byte[buffNumRomano + 0], 00h		; inserta nulo en posición 0
-    mov byte[buffNumRomano + 1], 00h		; inserta nulo en posición 1
-    mov byte[buffNumRomano + 2], 00h		; inserta nulo en posición 2
-    ret    
+
+;--------LimpiarBuffNumRomano--------;
+;                                    ;
+; Limpia el buffer que               ;
+; tiene le número romano             ;
+;                                    ;
+; Parametros: rax = buffer a limpiar ;
+; Salida: ---                        ;
+;____________________________________;
+LimpiarBuff:
+    push rsi
+    xor rsi, rsi
+    .begin:
+        cmp byte[rax + rsi], 00h                ; si encuentra un nulo, ya terminó el buffer
+        je .exit
+        
+        mov byte[rax + rsi], 00h                ; inserta nulo en la posición actual
+        inc rsi                                 ; incrementa contador
+        jmp .begin
+    .exit:
+        pop rsi
+        ret    
     
+
 ;-------------RotateLeftRotor-------------;
 ;                                         ;
 ; Aplica un rotate left a un buffer       ;
@@ -319,8 +354,140 @@ RotateLeftRotor:
       pop rbx
       pop rax
       ret
+
+
+;---------------RotarRotores---------------;
+;                                          ;
+; Desplaza los rotores n cantidad de veces ;
+;                                          ;
+; Parametros:                              ;
+; Salida: rotores desplazados              ;
+;__________________________________________;
+RotarRotores:
+  push rcx
+  push rsi
+  push r8
+  push r9
+  push rbx
+  xor rsi, rsi
+  mov rbx, 1                                          ; contador para referenciar los rotores
+
+  .begin:
+    cmp byte[buffDesplazamientoRotores + rsi], 00h    ; si es nulo, terminó de leer los deplazamientos
+    je .exit
+
+    mov r8, buffDesplazamientoRotores                 ; mueve buffer con desplazamientos al r8
+    mov r9, despTemp                                  ; mueve buffer temporal para deplazamiento al r9
+    call CargarNumeroABuffer                          ; cargar el primer número que se encuentre al despTemp
+
+    mov r8, despTemp                                  ; mueve buffer temporal para deplazamiento al r8
+    call Atoi                                         ; convierte despTemp al integer
+    
+    mov rax, despTemp                                 ; mueve buffer temporar al rax para limpiarlo
+    call LimpiarBuff
+    
+    push rsi                                          ; salva posición actual del buffer de deplazamientos
+    mov rcx, rdx                                      ; mueve cantidad de rotaciones al rcx
+
+    cmp rbx, 1                                        ; si el rbx es 1
+    je .selectRotorUno                                ; hay que rotar el rotor 1
+
+    cmp rbx, 2                                        ; si el rbx es 2
+    je .selectRotorDos                                ; hay que rotar el rotor 2
+
+    cmp rbx, 3                                        ; si el rbx es 3
+    je .selectRotorTres                               ; hay que rotar el rotor 3
+
+    .selectRotorUno:                
+      mov rsi, buffRotorUno                           ; asiga buffer de rotor uno para rotarlo
+      jmp .rotar                                      ; rotar
+
+    .selectRotorDos:
+      mov rsi, buffRotorDos                           ; asiga buffer de rotor dos para rotarlo
+      jmp .rotar                                      ; rotar
       
-;-------------RotateLeftRotor-------------;
+    .selectRotorTres:
+      mov rsi, buffRotorTres                          ; asiga buffer de rotor tres para rotarlo
+      jmp .rotar                                      ; rotar
+      
+    .rotar:
+      call RotateLeftRotor                            ; rotar
+      
+    pop rsi                                           ; vuelve la posición actual del buffer de desplazamientos
+    inc rbx                                           ; incrementa número de referencia de rotor
+    jmp .begin
+
+  .exit:
+    pop rbx
+    pop r9
+    pop r8
+    pop rsi
+    pop rcx
+    ret
+;--------------------Atoi--------------------;
+;                                            ;
+; Convierte Alfanumericos de un buffer       ;
+; a integers                                 ;
+;                                            ;
+; Parametros; r8 = buff con numero a cambiar ;
+; Salida: rdx = número decimal               ;
+;____________________________________________;
+Atoi:             
+    push rax
+    push rbx
+    push rsi
+    push rdi
+    
+    xor rsi, rsi
+    xor rax,rax
+    xor rbx, rbx
+    xor rdx, rdx
+    xor rdi, rdi
+    
+    .begin:
+        mov al, byte[r8 + rsi]
+        cmp al, 00h                       ; compara si es nulo
+        je .exit                          ; si es nulo, sale del procedimiento
+    
+        cmp al, 30h                       ; compara con '0'
+        jb .exit                          ; sale si es menor
+        
+        cmp al, 39h                       ; compara con '9'
+        ja .exit                          ; sale si es mayor  
+        
+        sub al, 30h                       ; resta 30h para convertir en número
+        
+        mov rdi, rax
+        inc rsi                           ; incrementa contador
+        jmp .seguir
+        
+    .seguir:
+        mov al, byte[r8 + rsi]            ; compara el siguiente caracter
+        cmp al, 00h                       ; si es nulo, sale del procedimiento
+        je .exit
+        
+        mov rax, rdx                      ; muevo al rax para multiplicarlo
+        mov rbx, 10
+        mul rbx                           ; multiplica al por bl
+        mov rdx, rax                      ; muevo resultado de la multiplicación al rdx
+        add rdx, rdi                      ; sumo el resultado al rdi
+        jmp .begin
+        
+    .exit:
+                                          ; para tomar el último número
+        mov rax, rdx                      
+        mov rbx, 10
+        mul rbx
+        mov rdx, rax
+        add rdx, rdi
+        
+        pop rdi
+        pop rsi
+        pop rbx
+        pop rax
+        ret
+      
+;-------------RotateLeftRotor Macro-------;
 ;                                         ;
 ; Aplica un rotate left a un buffer       ;
 ; n cantidad de veces                     ;
