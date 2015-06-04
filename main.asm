@@ -43,7 +43,6 @@ bufTextTmp: resb 1024
 textoCifrado: resb 1024
 lenTextoCifrado: equ $ - textoCifrado
 
-
 section .data
 newline:	db 0x0A
 rotor1: db "EKMFLGDQVZNTOWYHXUSPAIBRCJ"				; R
@@ -51,7 +50,7 @@ rotor2: db "AJDKSIRUXBLHWTMCQGZNPYFVOE"				; O
 rotor3: db "BDFHJLCPRTXVZNYEIWGAKMUSQO"				; T
 rotor4: db "ESOVPZJAYQUIRHXLNFTGKDCMWB"				; O
 rotor5: db "VZBRGITYUPSDNHLXAWMJQOFECK"				; RES
-reflector: db "EJMZALYXVBWFCRQUONTSPIKHGD"
+reflector: db "JPGVOUMFYQBENHZRDKASXLICTW"
 
 ErrMsg 	db "Terminated with error.",10
 ERRLEN equ $-ErrMsg
@@ -59,15 +58,24 @@ ERRLEN equ $-ErrMsg
 saltoLinea: db "", 10, 0			; saltoLinea
 saltoLineaLargo: equ $-saltoLinea
 
+encabezado: db "              ********** Máquina Enigma Versión Militar M3 **********", 0x0A, '[31m', 0x1b, '[44m'
+encabezadoLen: equ $-encabezado
 
-msjHOLA 	db 10,"aqui estoy.",10
+texto: db "El texto que ingresó ha sido encriptado. El texto encriptado es: ", 0x0A
+textoLen: equ $-texto
+
 section .text
   global _start
 
 _start:
+	
+	print saltoLinea, saltoLineaLargo
+	print encabezado, encabezadoLen
+	print saltoLinea, saltoLineaLargo
+	print texto, textoLen
 
 	; Toma el argumento de la línea de comando de la pila y lo valida
-	
+
 	pop rcx 	                		; Contiene el contador de argumentos
 	mov qword [ArgCount], rcx 			; Guarda la cantidad de argumentos en memoria
 
@@ -78,9 +86,6 @@ _start:
 	cmp rdx, rcx 						; Is the counter = the argument count?
 	jb SaveArgs 						; If not, loop back and do another
 
-	; With the argument pointers stored in ArgPtrs, we calculate their lengths:
-	
- 
   call CargarArchivos			; carga los archivos de configuración y la frase a encriptar
   call CargarRotoresSeleccionados	; carga los rotores que se selccionen en la configuración 
   call RotarRotores			; rota los rotores hasta las posiciones iniciales
@@ -88,18 +93,19 @@ _start:
   ; comienza el cifrado
   xor rdi, rdi
   xor rdx, rdx
+  xor rax, rax
   xor rbx, rbx
-  mov rcx, rax
-
+  
 
   xor r15, r15
   xor r13, r13
-  
   .loop:	
+	
 	cmp byte[textoFinal2+r15], 00h
 	je .exit
 	mov al, byte[textoFinal2+r15]	; textoFinal2 = palabra a cifrar
 	mov [textoCifrado], al
+
 	plugboardM 1, plugboard		;XF,PZ,SQ,GR,AJ,UO,CN,BV,TM,Ki
 	call printText ;call rotores	;rbx ==> puntero-cont recorre el bufer
 	rotoresM buffRotorUno, 1
@@ -118,24 +124,26 @@ _start:
 	call printText
 	plugboardM 1024, plugboard	
 	call printText
-	print textoCifrado,1
-	;print newline, 1
+	print newline, 1
 	;cmp r15, r8
 	;jne .loop
 	inc r15
 	jmp .loop
-	.exit:
-	  exit
 	
+	.exit
+	  exit
+
   printText:
-	;print newline, 1
-	  ;print textoCifrado, textoFinal2	
+	print newline, 1
+	  print textoCifrado, textoFinal2	
 	  lea rsi, [textoFinal2]
 	  lea rdi, [textoCifrado]			
 	  ret
   ;;prueba para saber que todo está bien
   ;call ImprimirRotores
   ;;
+
+  print saltoLinea, saltoLineaLargo
   
   call Exit
  
