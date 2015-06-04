@@ -1,3 +1,3 @@
-Args: Args.asm
-	@yasm -f elf64 -o Args.o Args.asm
-	@ld -o Args Args.o
+abrir_leer: abrir_leer.asm
+	@yasm -f elf64 -o abrir_leer.o abrir_leer.asm
+	@ld -o abrir_leer abrir_leer.o
