@@ -180,8 +180,8 @@ CargarArchivos:
 		  je .exit
 		  cmp byte[textoFinal + r10], ' '
 		  je .limpiar_plugboard
-		  cmp byte[textoFinal + r10], ','
-		  je .limpiar_plugboard
+		  ;cmp byte[textoFinal + r10], ','
+		  ;je .limpiar_plugboard
 		  mov al, byte[textoFinal + r10]   ; Si no es igual. mueve el byte al AL
 		  mov byte[plugboard + r9], al  ; Luego mueve lo que hay en AL, al primer byte 
 		  inc r9
