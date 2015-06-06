@@ -9,8 +9,9 @@
 
 
 ; std_out & std_in
+
 	
-%macro print 2  ;std_out, std_err (1,2),mensaje , lenMensaje
+%macro print 2  ; mensaje , lenMensaje
         push rax
 	push rdi
         push rsi
@@ -29,7 +30,7 @@
 %endmacro
 
 %macro leer 2   ;in = buffer, len out =  len lecura en r8,
-        push rax
+;        push rax
         push rdi
         push rsi
         push rdx
@@ -39,12 +40,11 @@
         mov rsi, %1
         mov rdx, %2
         syscall
-        mov r8 ,rax
-        ; len de lectura =  rax => r8
+        ; len de lectura =  rax 
         pop rdx
         pop rsi
         pop rdi
-        pop rax
+;        pop rax
 %endmacro
 
 %macro exit 0
