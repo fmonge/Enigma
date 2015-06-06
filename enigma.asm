@@ -13,90 +13,7 @@
 ;*	Gabreiel Pizarro 201216833	*
 ;****************************************
 %include "in_out.mac"
-
-
-
-%macro rotoresM 1
-	%%loop:
-	rotor %1, rbx	; %macro rotor 1  ; rotorActual
-	inc rbx
-	cmp rbx, rcx
-	jne %%loop
-	xor rbx, rbx
-	;ret
-%endmacro
-
-
-
-%macro rotor 2	;rotorNext, pos
-	push rax
-	xor rax, rax
-
-	mov al, byte [textIn + %2] ; rdx =  buf mas desplazamiento
-	sub al, 'A' 		;obtener pos en rotor next	
-	mov ah, byte [%1+ rax]	
-	mov al, ah		; en al para stosb
-	stosb 			; al a [rdi++]
-	;rotar %1, %2		; macro rotar
-
-	pop rax
-%endmacro
-
-%macro plugboardM 2		; lenBuf, plugboard
-	push rax		;XF,PZ,SQ,GR,AJ,UO,CN,BV,TM,KI	
-	push rcx	; cont Buf
-	push rbx	; cont de pb
-	push rdx	
-	
-	xor rcx, rcx
-%%loopBuf:
-	xor rbx, rbx
-	xor rax, rax
-	;div rbx, divide el rax entre el rbx, 
-	;deja el resultado en el rax y el residuo en el rdx	
-	mov al, [textoCifrado+ rcx]
-	
-%%loopPb:
-	mov ah, [%2+ rbx]
-	cmp al, ah
-	je %%swap
-	
-	inc rbx
-	cmp rbx, 29
-	jne %%loopPb
-	je %%continueLoop
-
-%%swap:
-	cmp rbx, 0
-	je %%masUno
-	cmp rbx, 1
-	je %%menosUno
-	cmp rbx, 28
-	je %%menosUno
-	cmp byte [%2+ rbx - 1], ','
-	je %%masUno
-	jne %%menosUno
-	
-%%masUno:		;no dec rdi	
-	mov ah, [%2 + rbx + 1 ]
-	mov [textoCifrado + rcx], ah
-	jmp %%continueLoop
-
-%%menosUno:
-	mov ah, [%2 + rbx - 1]
-	mov byte[textoCifrado + rcx], ah
-
-%%continueLoop:
-	inc rcx
-	cmp rcx, %1
-	jne %%loopBuf
-%%endPB
-	pop rdx
-	pop rbx
-	pop rcx	
-	pop rax
-%endmacro
-
+%include "cifrado.mac"
 
 section .bss
 
@@ -117,7 +34,7 @@ section .data
 	lenRotores:	equ $ - rotorUno
 	rotorDos:       db 'AJDKSIRUXBLHWTMCQGZNPYFVOE'
 	rotorTres:      db 'BDFHJLCPRTXVZNYEIWGAKMUSQO'
-plugboard:	db 'XF,PZ,SQ,GR,AJ,UO,CN,BV,TM,KI'
+	plugboard:	db 'XF,PZ,SQ,GR,AJ,UO,CN,BV,TM,KI'
 ;	plugboard:	db 'XFPZSQGRAJUOCNBVTMKI'
 	
 	
@@ -149,38 +66,40 @@ _start:
 	leer textIn, lenTextIn	;len de lectura --> rax
 	mov rcx, rax
 	dec rcx			;quitar 0x0A	
+	xor r8, r8
+	mov r8, rcx
 
- 	call copiarBuf		; mov textoCifrado, textIn	
+	call copiarBuf		; mov textoCifrado, textIn	
 
-;	plugboardM lenTextIn, plugboard
-
-	xor r8, r8 		
-	lea rsi, [textIn]
-	lea rdi, [textoCifrado]	 	
-	;;call rotores	;rbx ==> puntero-cont recorre el bufer
-
+	plugboardM lenTextIn, plugboard	;XF,PZ,SQ,GR,AJ,UO,CN,BV,TM,Ki
+ 	call printText
+			;call rotores	;rbx ==> puntero-cont recorre el bufer
 	rotoresM rotorUno
-
-        print newline, 1
-	print textoCifrado, lenTextIn
-	
-	print newline, 2
-
-
-
-	;print textIn, lenTextIn
+	call printText
+	rotoresM rotorDos
+	call printText
+	rotoresM rotorTres
+	call printText
+	rotoresM reflector
+	call printText
+	rotoresM rotorTres
+	call printText
+	rotoresM rotorDos
+	call printText
+	rotoresM rotorUno
+	call printText
+	plugboardM lenTextIn, plugboard	
+	call printText
 	exit
 	
-
-rotoresA:
-	rotor rotorUno, rbx	; %macro rotor 1  ; rotorActual
-	inc rbx
-	cmp rbx, rcx
-	jne rotoresA
-	xor rbx, rbx
+printText:
+        print newline, 1
+	print textoCifrado, lenTextIn	
+	lea rsi, [textIn]
+	lea rdi, [textoCifrado]	 		
 	ret
-;end rot1
 
+;end prinf
 copiarBuf:
 	push rcx
 	lea rsi, [textIn]
@@ -189,6 +108,3 @@ copiarBuf:
 	pop rcx
 	ret
 ;end copiar
-
-
-exit
