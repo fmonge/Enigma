@@ -1,3 +1,3 @@
-progra: progra.asm
-	@yasm -f elf64 -o progra.o progra.asm
-	@ld -o progra progra.o
+progra: main.asm
+	@yasm -f elf64 -o main.o main.asm
+	@ld -o main main.o
