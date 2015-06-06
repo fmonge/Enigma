@@ -49,29 +49,81 @@ saltoLinea: db "", 10, 0			; saltoLinea
 saltoLineaLargo: equ $-saltoLinea
 
 
-section .text
- 
+SECTION .text 			
+					; Contador para sacar los argumentos 
+
+
+ImprimirRotores:
+  push rax
+  push rdi
+  push rsi
+  push rdx
+  
+  mov rax, 1
+  mov rdi, 1
+  mov rsi, buffRotorUno
+  mov rdx, 27
+  syscall
+  
+  mov rax, 1
+  mov rdi, 1
+  mov rsi, saltoLinea
+  mov rdx, 1
+  syscall
+  
+  mov rax, 1
+  mov rdi, 1
+  mov rsi, buffRotorDos
+  mov rdx, 27
+  syscall
+
+  mov rax, 1
+  mov rdi, 1
+  mov rsi, saltoLinea
+  mov rdx, 1
+  syscall
+  
+  mov rax, 1
+  mov rdi, 1
+  mov rsi, buffRotorTres
+  mov rdx, 27
+  syscall
+  
+  mov rax, 1
+  mov rdi, 1
+  mov rsi, saltoLinea
+  mov rdx, 1
+  syscall
+  
+  pop rdx
+  pop rsi
+  pop rdi
+  pop rax
+  ret
 
 CargarArchivos:
-	  mov rcx,000000000000ffffh 	; Limit search to 65535 bytes max
-	  mov rdi,qword [ArgPtrs + rbx * 8]	; Put address of string to search in EDI
-	  mov rdx, rdi 			; Copy starting address into EDX
+	xor eax,eax 			; Searching for 0, so clear AL to 0
+	xor ebx,ebx 			; Pointer table offset starts at 0
+	.begin:
+	    mov rcx,000000000000ffffh 	; Limit search to 65535 bytes max
+	    mov rdi,qword [ArgPtrs + rbx * 8]	; Put address of string to search in EDI
+	    mov rdx, rdi 			; Copy starting address into EDX
 
-	  cld 				; Set search direction to up-memory
-	  repne scasb 			; Search for null (0 char) in string at edi
-	  jnz Error 			; REPNE SCASB ended without finding AL
+	    cld 				; Set search direction to up-memory
+	    repne scasb 			; Search for null (0 char) in string at edi
+	    jnz Error 			; REPNE SCASB ended without finding AL
 
-	  mov byte [rdi-1],10 		; Store an EOL where the null used to be
-	  sub rdi, rdx 			; Subtract position of 0 from start address
-	  mov qword [ArgLens + ebx * 8],rdi; Put length of arg into table
-	  inc rbx 			        ; Add 1 to argument counter
-	  cmp rbx, [ArgCount] 		; See if arg counter exceeds argument count
-	  jb CargarArchivos 			; If not, loop back and do another one
+	    mov byte [rdi-1],10 		; Store an EOL where the null used to be
+	    sub rdi, rdx 			; Subtract position of 0 from start address
+	    mov qword [ArgLens + ebx * 8],rdi; Put length of arg into table
+	    inc rbx 			        ; Add 1 to argument counter
+	    cmp rbx, [ArgCount] 		; See if arg counter exceeds argument count
+	    jb .begin 			; If not, loop back and do another one
 
 	  ; Display all arguments to stdout:
 	  xor rbx,rbx 			; Start (for table addressing reasons) at 0
 
-     Showem:
+  Showem:
 	  mov rsi,[ArgPtrs + 1 * 8] 			; Pasa la dirección a la que está apuntando el primer argumento al rsi
 
 	  xor r9, r9							; Contador para sacar el nombre de la pila y meterlo en un buffer
@@ -176,8 +228,8 @@ CargarArchivos:
 	  .limpiar_plugboard:
 		  inc r10
 		  cmp byte[textoFinal + r10], 0h
-		  ;je .imprimir
 		  je .exit
+		  ;je .imprimir
 		  cmp byte[textoFinal + r10], ' '
 		  je .limpiar_plugboard
 		  ;cmp byte[textoFinal + r10], ','
@@ -234,7 +286,7 @@ CargarArchivos:
 		  syscall
 	.exit:
 	  ret
-	  ;call Exit
+		  ;call Exit
 
 Error: 
 	mov rax, 1 			; Specify sys_write call
@@ -244,7 +296,6 @@ Error:
 	syscall
 	
 	call Exit
-	
 	
 ;------CargarRotoresSeleccionados------;
 ;                                      ;
