@@ -1,12 +1,16 @@
 ;macro cifrado
 ;	rotores, refector
 ;	plugboard
-	
+; %include "string.mac"	
 
-%macro rotoresM 1
+%macro rotoresM 2
         push rbx
-        push rcx
+        push rcx;!!!!!!1
 	push rax
+	push r8
+	push r9
+	xor r9, r9
+	mov rcx, %2
   	xor rbx, rbx
 %%loop:
 	xor rax, rax
@@ -16,19 +20,58 @@
 	mov al, ah              ; en al para stosb
         stosb                   ; al a [rdi++]
         ;rotar %1, %2           ; macro rotar
-        ;pop rax
-	; rotor %1, rbx   ; %macro rotor 1  ; rotorActual
+     	;cmp rcx, 1
+	rotarM %2
+
         inc rbx
         cmp rbx, r8
         jne %%loop
+;	je %%fin
+;	%%fin:
 
+	pop r9
+	pop r8
 	pop rax
         pop rcx
         pop rbx
-        xor rbx, rbx
+
+;        xor rbx, rbx
         ;ret
 %endmacro
 
+
+%macro rotarM 1
+;	push rcx
+	mov rcx, %1
+	cmp rcx, 1
+	je %%uno
+	cmp rcx, 2
+	je %%dos
+	cmp rcx, 3
+	je %%tres
+	jne %%fin
+
+%%uno:
+	rotarBuf rotorUno, 1
+	jmp %%fin	
+%%dos:
+	inc r9
+	cmp r9, 27
+	jne %%fin
+	rotarBuf rotorDos, 1
+	jmp %%fin
+%%tres:
+	inc r9
+	cmp r9, 676
+	jne %%fin
+	rotarBuf rotorDos, 1
+%%fin:
+;	pop rcx
+%endmacro
+
+
+
+;****************************************
 %macro plugboardM 2             ; lenBuf, plugboard
         push rax                ;XF,PZ,SQ,GR,AJ,UO,CN,BV,TM,KI  
         push rcx        ; cont Buf
@@ -52,7 +95,6 @@
         cmp rbx, 29
         jne %%loopPb
         je %%continueLoop
-
 %%swap:
         cmp rbx, 0
         je %%masUno
@@ -83,5 +125,32 @@
         pop rcx
         pop rax
 %endmacro
+;**********************************
 
 
+
+;**********************************
+%macro NOrotarBuf 2; buffer (deTamaño rcx) , cantidad de rotaciones
+	push rcx
+	push r8
+	push rdi
+	push rsi
+
+	mov r8, rcx
+	movBuf bufTmp, %1
+	sub rcx, %2
+	lea rsi, [bufTmp + %2]	
+	lea rdi, [%1]
+	rep movsb
+	lea rdi, [%1]
+	lea rsi, [bufTmp]
+	xor rcx, rcx
+	mov rcx, %2
+	rep movsb
+	
+
+	pop rsi
+	pop rdi
+	pop r8
+	pop rcx
+%endmacro

@@ -12,10 +12,15 @@
 ;*	Fabián Monge			*
 ;*	Gabreiel Pizarro 201216833	*
 ;****************************************
-%include "in_out.mac"
+%include "string.mac"
 %include "cifrado.mac"
 
 section .bss
+	bufTmp:	resb 1024
+	lenBufTmp:	equ $ - bufTmp
+
+	bufRotorTmp:	resb 26
+	lenBufRotorTmp:	equ $ - bufRotorTmp
 
 	textIn:		resb 1024
 	lenTextIn:	equ $ - textIn
@@ -69,42 +74,42 @@ _start:
 	xor r8, r8
 	mov r8, rcx
 
-	call copiarBuf		; mov textoCifrado, textIn	
+	movBuf textoCifrado, textIn		; mov textoCifrado, textIn	
+	;; call copiarBuf
 
-	plugboardM lenTextIn, plugboard	;XF,PZ,SQ,GR,AJ,UO,CN,BV,TM,Ki
+;	plugboardM lenTextIn, plugboard	;XF,PZ,SQ,GR,AJ,UO,CN,BV,TM,Ki
+
+	;; rotaciones iniciales ******
+	rotarBuf rotorUno, 1
+	print rotorUno, lenRotores	
+
  	call printText
+	
 			;call rotores	;rbx ==> puntero-cont recorre el bufer
-	rotoresM rotorUno
+	rotoresM rotorUno, 1 ; de tamaño r8, 
 	call printText
-	rotoresM rotorDos
+	rotoresM rotorDos, 2
 	call printText
-	rotoresM rotorTres
+	rotoresM rotorTres, 3
 	call printText
-	rotoresM reflector
+	rotoresM reflector, 0
 	call printText
-	rotoresM rotorTres
+	rotoresM rotorTres, 3
 	call printText
-	rotoresM rotorDos
+	rotoresM rotorDos, 2
 	call printText
-	rotoresM rotorUno
+	rotoresM rotorUno, 1
 	call printText
 	plugboardM lenTextIn, plugboard	
 	call printText
 	exit
 	
 printText:
-        print newline, 1
+       print newline, 1
 	print textoCifrado, lenTextIn	
 	lea rsi, [textIn]
 	lea rdi, [textoCifrado]	 		
 	ret
 
 ;end prinf
-copiarBuf:
-	push rcx
-	lea rsi, [textIn]
-	lea rdi, [textoCifrado]
-	rep movsb
-	pop rcx
-	ret
-;end copiar
+

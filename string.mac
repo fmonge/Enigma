@@ -47,14 +47,24 @@
 ;        pop rax
 %endmacro
 
+%macro movBuf 2 ; copia un buffer de tamaño rcx a otro de igual tamaño
+	push rcx
+        lea rdi, [%1]
+        lea rsi, [%2]
+        rep movsb
+        pop rcx
+      ;  ret
+%endmacro
+
+
 %macro exit 0
 
         xor rsi, rsi
         mov rax, sys_write
         mov rdi, std_out
-        mov rsi, 0x0a
+        mov rsi, 0x0A
         mov rdx, 1
-
+	syscall
         mov rax, sys_exit
         mov rdi, 0              ; return 0, success
         syscall
@@ -62,4 +72,33 @@
 %endmacro
 
 
+
+%macro rotarBuf 2 ; buffer (deTamaño 26) , cantidad de rotaciones
+        push rcx 
+        push r8
+        push rdi 
+        push rsi 
+	xor rcx, rcx
+	mov rcx, 26
+        mov r8, %2 
+	;dec r8
+        movBuf bufTmp, %1
+        sub rcx, %2
+	
+        lea rsi, [bufTmp + %2]  
+        lea rdi, [%1]
+        rep movsb
+      ;  lea rdi, [%1]
+	lea rsi, [bufTmp]
+        xor rcx, rcx 
+        mov rcx, %2
+	
+        rep movsb
+    
+
+        pop rsi 
+        pop rdi 
+        pop r8
+        pop rcx 
+%endmacro
 
