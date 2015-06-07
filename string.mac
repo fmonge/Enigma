@@ -70,32 +70,59 @@
         syscall
 
 %endmacro
-
-
-
-%macro rotarBuf 2 ; buffer (deTamaño 26) , cantidad de rotaciones
+;*****************
+%macro rotarBufIzq 2 ; buffer (de Tamaño 26) , cantidad de rotaciones
         push rcx 
         push r8
         push rdi 
         push rsi 
 	xor rcx, rcx
+
 	mov rcx, 26
         mov r8, %2 
-	;dec r8
         movBuf bufTmp, %1
-        sub rcx, %2
-	
+        sub rcx, %2	
         lea rsi, [bufTmp + %2]  
         lea rdi, [%1]
         rep movsb
-      ;  lea rdi, [%1]
 	lea rsi, [bufTmp]
         xor rcx, rcx 
         mov rcx, %2
-	
         rep movsb
     
 
+        pop rsi 
+        pop rdi 
+        pop r8
+        pop rcx 
+%endmacro
+
+;********************
+
+%macro rotarBufDer 1 ; buffer (de Tamaño 26) , cantidad de rotaciones
+        push rcx 
+        push r8
+        push rdi 
+        push rsi 
+	push rax
+	xor rcx, rcx
+
+	mov rcx, 26
+ ;       mov r8, %2 
+	mov al, byte[%1 + 25]	;ultima letra
+        movBuf bufTmp, %1
+	sub rcx, 1	
+	
+        lea rsi, [bufTmp]  
+        lea rdi, [%1 + 1]
+        rep movsb
+	mov byte [%1], al
+;	lea rsi, [bufTmp]
+ ;       xor rcx, rcx 
+  ;      mov rcx, %2
+ ;       rep movsb
+
+	pop rax
         pop rsi 
         pop rdi 
         pop r8

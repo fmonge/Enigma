@@ -2,11 +2,11 @@
 ;*	Tecnológico de Costa Rica	*
 ;*	Ingeniería en Computación	*
 ;*	Arquitectura de Computadoras	*
-;*	Profe:       			*
-;*	Erick Hernández Bonilla 	*
-;*	Proyecto:       		*
-;*	Máquina Enigma en Ensamblador 	*
-;*	Alumnos:    			*
+;*	Profe:				*
+;*	Erick Hernández Bonilla		*
+;*	Proyecto:			*
+;*	Máquina Enigma en Ensamblador	*
+;*	Alumnos:			*
 ;*	Melissa Molina 2013006074	*
 ;*	Liza Chaves Carranza 2013016573	*
 ;*	Fabián Monge			*
@@ -16,18 +16,15 @@
 %include "cifrado.mac"
 
 section .bss
-	bufTmp:	resb 1024
-	lenBufTmp:	equ $ - bufTmp
-
-	bufRotorTmp:	resb 26
-	lenBufRotorTmp:	equ $ - bufRotorTmp
-
+	bufTmp:		resb 1024
+	bufTextTmp:	resb 1024
+	
 	textIn:		resb 1024
 	lenTextIn:	equ $ - textIn
 	textoCifrado:	resb 1024
 	lenTextoCifrado:	equ $ - textoCifrado
 
- 	;plugboard:      resb 29
+	;plugboard:      resb 29
 	;lenPlugboard:   equ $ - plugboard
 	; ejemplo de blugboard:
 	; XF,PZ,SQ,GR,AJ,UO,CN,BV,TM,KI
@@ -35,20 +32,27 @@ section .bss
 section .data
 	
 	newline:	db 0x0A
-	rotorUno:       db 'EKMFLGDQVZNTOWYHXUSPAIBRCJ'
-	lenRotores:	equ $ - rotorUno
-	rotorDos:       db 'AJDKSIRUXBLHWTMCQGZNPYFVOE'
-	rotorTres:      db 'BDFHJLCPRTXVZNYEIWGAKMUSQO'
+	;rotorUno:       db 'EKMFLGDQVZNTOWYHXUSPAIBRCJ'
+	;rotorDos:       db 'AJDKSIRUXBLHWTMCQGZNPYFVOE'
+	;rotorTres:      db 'BDFHJLCPRTXVZNYEIWGAKMUSQO'
+
+	rotorTres:	db 'AXYDEBCVQJKFGLMRHINOPUWSTZ'
+	rotorDos:	db 'PTOSMXUWEBVQFACJDIGLKZNYRH'
+	rotorUno:       db 'ZPTWYLOUESMBXVQNFADIGCJKRH'
+	;;;;;		    ABCDEFGHIJKLMNOPQRSTUVWXYZ
+	
 	plugboard:	db 'XF,PZ,SQ,GR,AJ,UO,CN,BV,TM,KI'
-;	plugboard:	db 'XFPZSQGRAJUOCNBVTMKI'
+
+	lenRotores:	equ $ - rotorUno
 	
-	
-	rotorI:       	db 'EKMFLGDQVZNTOWYHXUSPAIBRCJ'
-	rotorII:       	db 'AJDKSIRUXBLHWTMCQGZNPYFVOE'
-	rotorIII:      	db 'BDFHJLCPRTXVZNYEIWGAKMUSQO'
-	rotorIV:  	db 'ESOVPZJAYQUIRHXLNFTGKDCMWB'
-	rotorV:   	db 'VZBRGITYUPSDNHLXAWMJQOFECK'
+	rotorI:		db 'EKMFLGDQVZNTOWYHXUSPAIBRCJ'
+	rotorII:	db 'AJDKSIRUXBLHWTMCQGZNPYFVOE'
+	rotorIII:	db 'BDFHJLCPRTXVZNYEIWGAKMUSQO'
+	rotorIV:	db 'ESOVPZJAYQUIRHXLNFTGKDCMWB'
+	rotorV:		db 'VZBRGITYUPSDNHLXAWMJQOFECK'
 	reflector:      db 'EJMZALYXVBWFCRQUONTSPIKHGD'
+	
+	;reflector: db 'YAMQRXSUJGZWVCTHLIPFOBNKED'
 	;reflectorB:	db 'YRUHQSLDPXNGOKMIEBFZCWVJAT'
 	;reflectorC:	db 'FVPJIAOYEDRZXWGCTKUQSBNMHL'
 	;estatico:	db 'ABCDEFHGIJKLMNOPQRSTUVWXYZ'
@@ -56,7 +60,7 @@ section .data
 
 
 	;plugboard:	resb 29
-	;lenPlugboard: 	equ $ - plugboard
+	;lenPlugboard:	equ $ - plugboard
 	; ejemplo de blugboard:
 		;XF,PZ,SQ,GR,AJ,UO,CN,BV,TM,Ki
 
@@ -73,20 +77,27 @@ _start:
 	dec rcx			;quitar 0x0A	
 	xor r8, r8
 	mov r8, rcx
+	dec r8
+	mov r10, rax
+;	xor r10, r10
+	rotarBufIzq rotorUno, 4	
+	rotarBufIzq rotorDos, 4
+	rotarBufIzq rotorTres, 4
 
-	movBuf textoCifrado, textIn		; mov textoCifrado, textIn	
+;	movBuf bufTextTmp, textIn		; mov textX, textY	
+;	movBuf textoCifrado, textIn
 	;; call copiarBuf
-
-;	plugboardM lenTextIn, plugboard	;XF,PZ,SQ,GR,AJ,UO,CN,BV,TM,Ki
-
-	;; rotaciones iniciales ******
-	rotarBuf rotorUno, 1
-	print rotorUno, lenRotores	
-
- 	call printText
+	xor r15, r15
+	dec r15
 	
-			;call rotores	;rbx ==> puntero-cont recorre el bufer
-	rotoresM rotorUno, 1 ; de tamaño r8, 
+.loop:	
+	inc r15
+	mov al, byte[textIn+r15]	
+	mov [textoCifrado], al
+
+	plugboardM 1, plugboard		;XF,PZ,SQ,GR,AJ,UO,CN,BV,TM,Ki
+	call printText ;call rotores	;rbx ==> puntero-cont recorre el bufer
+	rotoresM rotorUno, 1
 	call printText
 	rotoresM rotorDos, 2
 	call printText
@@ -94,21 +105,24 @@ _start:
 	call printText
 	rotoresM reflector, 0
 	call printText
-	rotoresM rotorTres, 3
+	rotoresOutM rotorTres, 3
 	call printText
-	rotoresM rotorDos, 2
+	rotoresOutM rotorDos, 2
 	call printText
-	rotoresM rotorUno, 1
+	rotoresOutM rotorUno, 1
 	call printText
 	plugboardM lenTextIn, plugboard	
 	call printText
+	print newline, 1
+	cmp r15, r8
+	jne .loop
 	exit
 	
 printText:
        print newline, 1
 	print textoCifrado, lenTextIn	
 	lea rsi, [textIn]
-	lea rdi, [textoCifrado]	 		
+	lea rdi, [textoCifrado]			
 	ret
 
 ;end prinf
