@@ -88,6 +88,7 @@ _start:
 ;	movBuf textoCifrado, textIn
 	;; call copiarBuf
 	xor r15, r15
+	xor r13, r13
 	dec r15
 	
 .loop:	
@@ -105,11 +106,11 @@ _start:
 	call printText
 	rotoresM reflector, 0
 	call printText
-	rotoresOutM rotorTres, 3
+	rotoresOutM rotorTres, 3, r15
 	call printText
-	rotoresOutM rotorDos, 2
+	rotoresOutM rotorDos, 2, r15
 	call printText
-	rotoresOutM rotorUno, 1
+	rotoresOutM rotorUno, 1, r15
 	call printText
 	plugboardM lenTextIn, plugboard	
 	call printText

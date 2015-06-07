@@ -3,7 +3,7 @@
 ;	plugboard
 
 
-%macro rotoresOutM 2
+%macro rotoresOutM 3
         push rbx
         push rcx;!!!!!!1
 	push rax
@@ -29,7 +29,7 @@
 	mov rax, rcx
 	add al, 'A'
         stosb                   ; al a [rdi++]
-	rotarM %2
+	rotarM %2, %3
         inc rbx
 ;        cmp rbx, r8
 ;        jne %%loop
@@ -46,7 +46,7 @@
 
 ;******************
 
-%macro rotoresM 2
+%macro rotoresM 2	;entrada rotores
         push rbx
         push rcx;!!!!!!1
 	push rax
@@ -75,8 +75,9 @@
 %endmacro
 
 
-%macro rotarM 1
+%macro rotarM 2
 ;	push rcx
+;	inc r13	;contador de letras
 	mov rcx, %1
 	cmp rcx, 1
 	je %%uno
@@ -90,15 +91,18 @@
 	rotarBufIzq rotorUno, 1
 	jmp %%fin	
 %%dos:
-	inc r9
-	cmp r9, 27
+;	inc r9
+	cmp r13, 25
 	jne %%fin
+	inc r14
+	xor r13,r13
 	rotarBufIzq rotorDos, 1
 	jmp %%fin
 %%tres:
-	inc r9
-	cmp r9, 676
+	inc r13
+	cmp r14, 25
 	jne %%fin
+	xor r14,r14
 	rotarBufIzq rotorDos, 1
 %%fin:
 ;	pop rcx
@@ -108,7 +112,9 @@
 
 
 
-%macro rotarDerM 1
+%macro rotarDerM 2
+	inc r13
+	mov r9, %2
 ;	push rcx
 	mov rcx, %1
 	cmp rcx, 1
@@ -124,15 +130,16 @@
  	rotarBufDer rotorUno
 	jmp %%fin	
 %%dos:
-	inc r9
-	cmp r9, 27
-	jne %%fin
+;	inc r9
+	cmp r13, 25	;gira cada  26 letras, 0 - > 25
+	jne %%fin	
+	xor r13, r13
  	rotarBufDer rotorDos
 	jmp %%fin
 %%tres:
-	inc r9
 	cmp r9, 676
 	jne %%fin
+	xor r13, r13
  	rotarBufDer rotorTres
 %%fin:
 ;	pop rcx
