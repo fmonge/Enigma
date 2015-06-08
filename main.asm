@@ -88,11 +88,14 @@ _start:
   xor rdx, rdx
   xor rax, rax
   xor rbx, rbx
+  
+
   xor r15, r15
   xor r13, r13
-  dec r15
   .loop:	
-	inc r15
+	
+	cmp byte[textoFinal2+r15], 00h
+	je .exit
 	mov al, byte[textoFinal2+r15]	; textoFinal2 = palabra a cifrar
 	mov [textoCifrado], al
 
@@ -115,9 +118,13 @@ _start:
 	plugboardM 1024, plugboard	
 	call printText
 	print newline, 1
-	cmp r15, r8
-	jne .loop
-	exit
+	;cmp r15, r8
+	;jne .loop
+	inc r15
+	jmp .loop
+	
+	.exit
+	  exit
 	
   printText:
 	print newline, 1
