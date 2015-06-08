@@ -79,10 +79,11 @@ _start:
 	; With the argument pointers stored in ArgPtrs, we calculate their lengths:
 	
  
-  call CargarArchivos
-  call CargarRotoresSeleccionados
-  call RotarRotores
+  call CargarArchivos			; carga los archivos de configuración y la frase a encriptar
+  call CargarRotoresSeleccionados	; carga los rotores que se selccionen en la configuración 
+  call RotarRotores			; rota los rotores hasta las posiciones iniciales
   
+  ; comienza el cifrado
   xor rdi, rdi
   xor rdx, rdx
   xor rax, rax

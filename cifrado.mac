@@ -88,7 +88,7 @@
 	jne %%fin
 
 %%uno:
-	rotarBufIzq rotorUno, 1
+	rotarBufIzq buffRotorUno, 1
 	jmp %%fin	
 %%dos:
 ;	inc r9
@@ -96,14 +96,14 @@
 	jne %%fin
 	inc r14
 	xor r13,r13
-	rotarBufIzq rotorDos, 1
+	rotarBufIzq buffRotorDos, 1
 	jmp %%fin
 %%tres:
 	inc r13
 	cmp r14, 25
 	jne %%fin
 	xor r14,r14
-	rotarBufIzq rotorDos, 1
+	rotarBufIzq buffRotorDos, 1
 %%fin:
 ;	pop rcx
 %endmacro
