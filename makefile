@@ -1,3 +1,3 @@
-todo: enigma.o
-	yasm -f elf64 enigma.asm -o enigma.o
-	ld enigma.o -o enigma
+main: main.asm
+	@yasm -f elf64 -o main.o main.asm
+	@ld -o main main.o
