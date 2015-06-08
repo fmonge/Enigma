@@ -46,7 +46,8 @@ ImprimirRotores:
   pop rax
   ret
 
-CargarArchivos:
+CargarArchivos: 
+	push rax
 	xor eax,eax 			; Searching for 0, so clear AL to 0
 	xor ebx,ebx 			; Pointer table offset starts at 0
 	.begin:
@@ -230,6 +231,7 @@ CargarArchivos:
 		  mov rdx, saltoLineaLargo
 		  syscall
 	.exit:
+	  pop rax
 	  ret
 		  ;call Exit
 
