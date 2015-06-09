@@ -74,6 +74,21 @@ encritadoLen: equ $-encriptado
 flecha: db " <----", 0x0A
 flechaLen: equ $-flecha
 
+colorRojo: db 0x1b,'[31m'
+colorRojoLEN : equ $-colorRojo
+
+colorCeleste: db 0x1b,'[36m'
+colorCelesteLEN : equ $-colorCeleste
+
+colorAzul:     db 0x1b,'[34m' 
+colorAzulLEN: equ $-colorAzul
+
+colorAmarillo:     db 0x1b,'[33m' 
+colorAmarilloLEN: equ $-colorAmarillo
+
+clearColor:     db 0x1b,'[0m', 0x1b, '[40m'
+clearColorLEN:  equ $-clearColor
+
 
 msjHOLA 	db 10,"aqui estoy.",10
 section .text
@@ -82,9 +97,12 @@ section .text
 _start:
 
 	print saltoLinea, saltoLineaLargo
+	print colorCeleste,colorCelesteLEN
 	print encabezado, encabezadoLen
 	print saltoLinea, saltoLineaLargo
+	print colorAzul,colorAzulLEN
 	print texto, textoLen
+	print clearColor,clearColorLEN
 
 	; Toma el argumento de la línea de comando de la pila y lo valida
 	
@@ -121,6 +139,7 @@ _start:
 	mov al, byte[textoFinal2+r15]	; textoFinal2 = palabra a cifrar
 	mov [textoCifrado], al
 	plugboardM 1, plugboard		;XF,PZ,SQ,GR,AJ,UO,CN,BV,TM,Ki
+	print colorCeleste,colorCelesteLEN
 	call printText ;call rotores	;rbx ==> puntero-cont recorre el bufer
 	rotoresM buffRotorUno, 1
 	call printText
@@ -136,10 +155,12 @@ _start:
 	call printText
 	rotoresOutM buffRotorUno, 1, r15
 	call printText
-	plugboardM 1024, plugboard	
+	plugboardM 1024, plugboard
+	print colorRojo,colorRojoLEN
 	call printText
 	print flecha, flechaLen
 	print newline, 1
+	print clearColor,clearColorLEN
 
 	inc r15
 	jmp .loop
@@ -147,11 +168,16 @@ _start:
 	.exit:
 
 		print saltoLinea, saltoLineaLargo
+		print colorAzul,colorAzulLEN
 		print respuesta, respuestaLen
+		print colorCeleste,colorCelesteLEN
 		print textoFinal2, lenTextoFinal2
 		print saltoLinea, saltoLineaLargo
+		print colorAzul,colorAzulLEN
 		print encriptado, encritadoLen
+		print colorCeleste,colorCelesteLEN
 		print textoCifrado, lenTextoCifrado
+		print clearColor,clearColorLEN
 		print saltoLinea, saltoLineaLargo
 
 	  exit
