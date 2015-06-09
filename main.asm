@@ -167,18 +167,18 @@ _start:
 
 	.exit:
 
-		print saltoLinea, saltoLineaLargo
-		print colorAzul,colorAzulLEN
-		print respuesta, respuestaLen
-		print colorCeleste,colorCelesteLEN
-		print textoFinal2, lenTextoFinal2
-		print saltoLinea, saltoLineaLargo
-		print colorAzul,colorAzulLEN
-		print encriptado, encritadoLen
-		print colorCeleste,colorCelesteLEN
-		print textoCifrado, lenTextoCifrado
-		print clearColor,clearColorLEN
-		print saltoLinea, saltoLineaLargo
+		; print saltoLinea, saltoLineaLargo
+		; print colorAzul,colorAzulLEN
+		; print respuesta, respuestaLen
+		; print colorCeleste,colorCelesteLEN
+		; print textoFinal2, lenTextoFinal2
+		; print saltoLinea, saltoLineaLargo
+		; print colorAzul,colorAzulLEN
+		; print encriptado, encritadoLen
+		; print colorCeleste,colorCelesteLEN
+		; print textoCifrado, lenTextoCifrado
+		; print clearColor,clearColorLEN
+		; print saltoLinea, saltoLineaLargo
 
 	  exit
 	
